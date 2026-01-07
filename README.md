@@ -60,4 +60,4 @@ When adding new skills to this repository:
 
 ## License
 
-This repository contains personal coding skills and preferences.
+This repository contains personal coding skills and preferences. Feel free to use and adapt these skills for your own projects.
