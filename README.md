@@ -4,7 +4,7 @@ This repository contains a collection of **global Claude Code Skills** designed 
 
 ## What are Claude Code Skills?
 
-Claude Code Skills are custom code capabilities that extend Claude's ability to perform specific tasks, follow particular patterns, or apply specialized knowledge when writing, reviewing, or refactoring code. These skills act as reusable instructions that help Claude understand your preferences, coding standards, and project-specific requirements.
+[Claude Code Skills](https://code.claude.com/docs/en/skills) are custom code capabilities that extend Claude's ability to perform specific tasks, follow particular patterns, or apply specialized knowledge when writing, reviewing, or refactoring code. These skills act as reusable instructions that help Claude understand your preferences, coding standards, and project-specific requirements.
 
 Code Skills can include:
 - **Coding conventions** and style preferences
