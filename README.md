@@ -1,64 +1,61 @@
-# Claude Code Skills
+# Claude Code Configuration
 
-This repository contains a collection of **global Claude Code Skills** designed to be used across all projects when working with Claude AI.
+This repository contains my **global Claude Code configuration** — skills, agents, and project instructions designed to be used across all projects when working with Claude AI.
 
-## What are Claude Code Skills?
+## Components
 
-[Claude Code Skills](https://code.claude.com/docs/en/skills) are custom code capabilities that extend Claude's ability to perform specific tasks, follow particular patterns, or apply specialized knowledge when writing, reviewing, or refactoring code. These skills act as reusable instructions that help Claude understand your preferences, coding standards, and project-specific requirements.
+### Skills (`skills/`)
 
-Code Skills can include:
+[Claude Code Skills](https://code.claude.com/docs/en/skills) are custom code capabilities that extend Claude's ability to perform specific tasks, follow particular patterns, or apply specialized knowledge. Skills act as reusable instructions invoked with `/skill-name`.
 
+Skills can include:
 - **Coding conventions** and style preferences
 - **Architecture patterns** and best practices
 - **Testing strategies** and patterns
-- **Documentation standards**
-- **Security guidelines** and common vulnerability patterns
 - **Framework-specific** patterns and idioms
 - **Domain-specific** knowledge and approaches
 
-## Global Skills
+### Agents (`.claude/agents/`)
 
-The skills in this repository are intended to be **global** — meaning they apply across all projects rather than being specific to a single codebase. These are universal patterns, conventions, and best practices that you want Claude to follow consistently regardless of which project you're working on.
+[Custom agents](https://code.claude.com/docs/en/agents) are specialized sub-agents that Claude can spawn via the Task tool. Each agent has a specific purpose and can be configured with different models and instructions.
 
-Examples of global skills include:
+Current agents:
+- **code-improvement-reviewer** — Reviews code for readability, performance, and best practices with concrete before/after suggestions
 
-- Preferring functional programming patterns
-- Always including error handling
-- Writing comprehensive tests with specific patterns
-- Following specific documentation formats (JSDoc, docstrings, etc.)
-- Applying security best practices consistently
-- Using particular naming conventions
+### Project Instructions (`.claude/CLAUDE.md`)
 
-## How to Use These Skills
+The [CLAUDE.md file](https://code.claude.com/docs/en/memory#claudemd) defines working relationship preferences and tooling guidelines that apply globally. This includes:
+- Communication style (concise, no sycophancy)
+- Tooling preferences (prefer Makefile targets, use Edit over sed)
+- Collaboration norms (challenge assumptions, do things right)
 
-To use these skills with Claude:
+## Global Configuration
 
-1. Reference the appropriate skills from this repository when starting a conversation with Claude
-1. Include the skill descriptions in your Claude project settings or system prompts
-1. Ask Claude to apply specific skills when working on particular tasks
+Everything in this repository is intended to be **global** — applying across all projects rather than being specific to a single codebase. These are universal patterns, conventions, and preferences I want Claude to follow consistently.
 
 ## Structure
 
-Skills should be organized by category or domain to make them easy to discover and apply:
-
 ```
+.claude/
+├── CLAUDE.md           # Global project instructions
+└── agents/
+    └── *.md            # Custom agent definitions
 skills/
 ├── coding-standards/
 ├── testing/
 ├── security/
-├── documentation/
-└── architecture/
+└── ...
 ```
 
 ## Contributing
 
-When adding new skills to this repository:
+When adding to this repository:
 
-1. Ensure the skill is truly **global** and applicable across multiple projects
-1. Write clear, concise descriptions that Claude can easily understand
-1. Include examples where helpful
-1. Avoid project-specific details or configurations
-1. Test the skill with Claude to ensure it produces the desired behavior
+1. Ensure additions are truly **global** and applicable across multiple projects
+2. Write clear, concise descriptions that Claude can easily understand
+3. Include examples where helpful
+4. Avoid project-specific details or configurations
+5. Test with Claude to ensure the desired behavior
 
 ## License
 
