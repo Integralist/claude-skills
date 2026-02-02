@@ -41,13 +41,16 @@ Everything in this repository is intended to be **global** — applying across a
 ```
 .claude/
 ├── CLAUDE.md           # Global project instructions
-└── agents/
-    └── *.md            # Custom agent definitions
-skills/
-├── go-api/
-├── go-testing/
-├── project-plan/
-└── ...
+├── agents/
+│   └── *.md            # Custom agent definitions
+└── skills/
+    ├── commit/
+    ├── delegate/
+    ├── go-api/
+    ├── go-testing/
+    ├── markdown-to-skill/
+    ├── project-plan/
+    └── systematic-debugging/
 ```
 
 > [!NOTE]
