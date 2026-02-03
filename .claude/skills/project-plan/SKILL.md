@@ -10,18 +10,22 @@ Create structured project plan documents for tracking implementation work.
 ## Instructions
 
 1. Ask the user for:
+
    - **Project name**: Short descriptive title
    - **Summary**: One paragraph describing what needs to be done and why
    - **Location**: Where to save the file (default: `docs/projects/` with kebab-case filename)
 
-2. Explore the codebase to understand:
+1. Ask the user whether they have any Gherkin user stories to define when the feature is complete.
+
+1. Explore the codebase to understand:
+
    - Current state relevant to the project
    - Files that will need changes
    - Existing patterns to follow
 
-3. Get the author name from `git config user.name`
+1. Get the author name from `git config user.name`
 
-4. Create a markdown file following the template structure below
+1. Create a markdown file following the template structure below
 
 ## Template
 
