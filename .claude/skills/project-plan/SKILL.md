@@ -29,6 +29,9 @@ Create structured project plan documents for tracking implementation work.
 
 ## Template
 
+> [!IMPORTANT]
+> The project plan text must wrap at 80 characters to avoid long lines.
+
 ```markdown
 # {Project Name}
 
