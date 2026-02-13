@@ -24,6 +24,14 @@ Current agents:
 
 - **code-improvement-reviewer** — Reviews code for readability, performance, and best practices with concrete before/after suggestions
 
+### Rules (`.claude/rules/`)
+
+[Rules](https://code.claude.com/docs/en/memory#modular-rules-with-claude%2Frules%2F) are modular, topic-specific instruction files that Claude loads automatically. Unlike skills (which are invoked explicitly), rules apply passively — scoped to file patterns via YAML frontmatter `paths` globs.
+
+Current rules:
+
+- **go.md** — Go coding conventions: struct layout, error handling, logging, observability, testing, and layer separation. Scoped to `**/*.go`.
+
 ### Project Instructions (`.claude/CLAUDE.md`)
 
 The [CLAUDE.md file](https://code.claude.com/docs/en/memory#claudemd) defines working relationship preferences and tooling guidelines that apply globally. This includes:
@@ -43,6 +51,8 @@ Everything in this repository is intended to be **global** — applying across a
 ├── CLAUDE.md           # Global project instructions
 ├── agents/
 │   └── *.md            # Custom agent definitions
+├── rules/
+│   └── *.md            # Modular, path-scoped rules
 └── skills/
     ├── commit/
     ├── delegate/

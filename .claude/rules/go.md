@@ -198,8 +198,7 @@ httpx.WriteJSON(ctx, logger, w, http.StatusNotFound, problem)
 ## Service Layer
 
 - Trace-wrap the operation; metrics outside the span.
-- Validate at service boundary; return `*errorsx.ValidationError`.
-- Authorization checks before business logic.
+- Validate at service boundary; return validation errors.
 
 ```go
 func (s *Service) CreateThing(ctx context.Context, params ServiceParams) (*Thing, error) {
@@ -209,9 +208,6 @@ func (s *Service) CreateThing(ctx context.Context, params ServiceParams) (*Thing
 		err   error
 	)
 	spanFunc := func(ctx context.Context) error {
-		if err := s.authz.CanAccess(ctx, params.CustomerID, params.ID); err != nil {
-			return fmt.Errorf("service: access denied: %w", err)
-		}
 		// ... business logic
 		return nil
 	}
