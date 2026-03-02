@@ -1,6 +1,6 @@
 ---
 paths:
-  - "**/*.go"
+  - '**/*.go'
 ---
 
 We are peers writing Go. Prioritize correctness, clarity, and best practices.
@@ -170,6 +170,7 @@ for _, tc := range testCases {
 - Use `testify/mock` for mock implementations.
 - Build tag `e2e` for integration tests; unit tests have no build tags.
 - Compile-time interface compliance in test utility packages.
+- Always add code comments above the test function to explain what it validates.
 
 ## HTTP Handlers
 
