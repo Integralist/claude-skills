@@ -7,10 +7,26 @@ We are peers writing Go. Prioritize correctness, clarity, and best practices.
 
 ## Tooling
 
-- Run `go vet ./...`
-- Run `go-critic check ./...` (if not installed: `go install -v github.com/go-critic/go-critic/cmd/go-critic@latest`)
-- Run `gofumpt -l -w .` (if not installed: `go install mvdan.cc/gofumpt@latest`)
-- Run `staticcheck ./...` (if not installed: `go install honnef.co/go/tools/cmd/staticcheck@latest`)
+After editing Go files, run the following linters to catch issues before
+committing:
+
+- `go vet ./...`
+- `go-critic check ./...` (if not installed:
+  `go install -v github.com/go-critic/go-critic/cmd/go-critic@latest`)
+- `staticcheck ./...` (if not installed:
+  `go install honnef.co/go/tools/cmd/staticcheck@latest`)
+
+Fix any reported issues before considering the task complete.
+
+## Formatting
+
+After editing Go files, run `gofumpt` to format all changed files:
+
+```bash
+gofumpt -l -w .
+```
+
+If not installed: `go install mvdan.cc/gofumpt@latest`
 
 ## Structs
 
@@ -74,6 +90,60 @@ func NewService(repo *MySQLRepository, tracer trace.Tracer, logger *slog.Logger)
 	}
 }
 ```
+
+When a constructor has more than 4 parameters (including `ctx`), use a params
+struct instead:
+
+```go
+type ServiceParams struct {
+	Logger  *slog.Logger
+	Metrics *metrics.Metrics
+	Repo    *MySQLRepository
+	Tracer  trace.Tracer
+}
+
+func NewService(p ServiceParams) *Service {
+	return &Service{
+		logger:  p.Logger,
+		metrics: p.Metrics,
+		repo:    p.Repo,
+		tracer:  p.Tracer,
+	}
+}
+```
+
+For types with required parameters plus optional configuration with sensible
+defaults, use `WithXxx` method chaining. `NewX` takes only required params;
+`WithXxx` methods set optional fields and return the receiver:
+
+```go
+func NewClient(baseURL string) *Client {
+	return &Client{
+		baseURL:    baseURL,
+		httpClient: http.DefaultClient,
+		timeout:    30 * time.Second,
+	}
+}
+
+func (c *Client) WithHTTPClient(h *http.Client) *Client {
+	c.httpClient = h
+	return c
+}
+
+func (c *Client) WithTimeout(d time.Duration) *Client {
+	c.timeout = d
+	return c
+}
+```
+
+### When to use each pattern
+
+- **Params struct** — constructor has >4 args (including `ctx`). Solves "too
+  many arguments".
+- **`WithXxx` methods** — type has optional configuration with sensible
+  defaults. Solves "optional config with discoverable defaults". `NewX` takes
+  only required params; `WithXxx` methods set optional fields.
+- The two are orthogonal — a type could use both if needed.
 
 Tracer initialization at package or constructor level:
 
