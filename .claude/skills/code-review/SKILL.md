@@ -2,7 +2,7 @@
 name: code-review
 description: >-
   Code review using a team of specialized agents. Analyzes
-  consistency, idiomatic Go, data correctness, and security.
+  consistency, idiomatic Go, data correctness, security, and architecture.
   Works on PRs (/code-review <PR_URL>) or local code
   (/code-review, /code-review --diff, /code-review --uncommitted,
   /code-review path/to/file.go).
@@ -12,7 +12,7 @@ argument-hint: '[PR_URL | --diff | --uncommitted | path]'
 
 # Code Review Skill
 
-Review code using four specialized agents working in parallel.
+Review code using five specialized agents working in parallel.
 Each agent focuses on a different review dimension. Works against
 GitHub PRs or local code changes.
 
@@ -106,7 +106,7 @@ embedding the entire diff in the prompt.
 
 ## Create Team and Tasks
 
-Create a team named `code-review-<branch-or-context>` with four
+Create a team named `code-review-<branch-or-context>` with five
 tasks:
 
 1. **Consistency Review** — naming patterns, code style consistency, error
@@ -121,10 +121,15 @@ tasks:
 1. **Security Review** — injection/cardinality attacks on labels or inputs,
    information leakage, unbounded reads or allocations, resource exhaustion,
    dependency security, timing side channels, authentication/authorization gaps
+1. **Architecture Review** — separation of concerns, dependency direction (no
+   circular or upward dependencies), interface design and abstraction boundaries,
+   package cohesion and coupling, adherence to existing architectural patterns in
+   the codebase, inappropriate layering violations, single-responsibility at the
+   package and type level, extensibility without over-engineering
 
-## Spawn Four Agents in Parallel
+## Spawn Five Agents in Parallel
 
-Spawn four `general-purpose` agents on the team, one per task. Each
+Spawn five `general-purpose` agents on the team, one per task. Each
 agent prompt must include:
 
 - The review dimension and what to focus on
@@ -171,7 +176,7 @@ send a shutdown_request.
 
 ## Compile Summary
 
-After all four agents have reported, delete the team.
+After all five agents have reported, delete the team.
 
 ### PR mode output
 
