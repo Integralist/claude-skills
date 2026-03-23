@@ -207,6 +207,19 @@ s.metrics.Count(ctx, "path_operations_total", "operation=create", "result="+resu
 s.metrics.Measure(ctx, "service_operation_duration_seconds", time.Since(start).Seconds(), "operation=create_path", "result="+result)
 ```
 
+## Concurrency
+
+Prefer `wg.Go` (Go 1.25+) over manual `wg.Add`/`go`/`wg.Done`:
+
+```go
+var wg sync.WaitGroup
+wg.Go(func() { /* task */ })
+wg.Go(func() { /* task */ })
+wg.Wait()
+```
+
+`wg.Go` handles Add/Done internally; the func must not panic.
+
 ## Context Cancellation
 
 Always use the `*Cause` variants so every cancellation carries a reason:
