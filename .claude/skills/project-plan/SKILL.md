@@ -7,6 +7,22 @@ description: Creates project plan documents for tracking implementation work. Us
 
 Create structured project plan documents for tracking implementation work.
 
+Ensure the plan has then appropriate abstraction level.
+
+A good plan specifies:
+
+- What changes and why (the problem, the approach, the tradeoffs)
+- Which files are touched and what each change accomplishes
+- Design decisions that aren't obvious from the code
+- What to test (behaviors, not mock patterns)
+
+A good plan does NOT specify:
+
+- Exact code to write (that's what the implementation is for)
+- Exact SQL patterns for test mocks
+- Line-by-line HTML/JS to paste in
+- Implementation details recoverable from context
+
 ## Instructions
 
 1. Ask the user for:
