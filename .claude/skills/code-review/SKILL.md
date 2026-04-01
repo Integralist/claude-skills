@@ -204,9 +204,9 @@ for awareness.
 
 ### Local mode output
 
-Create the output directory with `mkdir -p docs/projects`, then
+Create the output directory with `mkdir -p docs/plans`, then
 write the review to
-`docs/projects/code-review-<YYYY-MM-DD-HHMM>.md`:
+`docs/plans/code-review-<YYYY-MM-DD-HHMM>.md`:
 
 ```markdown
 ## Code Review: <branch-name or "uncommitted" or path>

@@ -145,9 +145,9 @@ and send a `shutdown_request`.
 
 After the agent has reported, delete the team.
 
-Create the output directory with `mkdir -p docs/projects`, then
+Create the output directory with `mkdir -p docs/plans`, then
 write the report to
-`docs/projects/cleanup-<YYYY-MM-DD-HHMM>.md`:
+`docs/plans/cleanup-<YYYY-MM-DD-HHMM>.md`:
 
 ```markdown
 ## Cleanup Report

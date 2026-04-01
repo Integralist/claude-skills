@@ -164,6 +164,6 @@ make lint-all
 ## Documentation
 
 - Place all documentation in `docs/`
-- Project plans go in `docs/projects/`
-- Move completed plans to `docs/projects/completed/`
+- Project plans go in `docs/plans/`
+- Move completed plans to `docs/plans/completed/`
 - Each internal package MUST have a `README.md` explaining its purpose and usage
