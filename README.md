@@ -90,6 +90,26 @@ patterns, conventions, and preferences I want Claude to follow consistently.
     └── test-feedback/
 ```
 
+### Skill Reference
+
+| Skill                    | Invocation                                                 | Description                                                                                                                                                                 |
+| ------------------------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **cleanup**              | `/cleanup [path \| glob]`                                  | Audit a codebase for AI slop. Fixes obvious issues directly and flags anything that would change behavior. Runs as a background agent.                                      |
+| **code-research**        | `/code-research <repo-name \| github-url>`                 | Locate and explore a repository by name or GitHub URL. Finds it locally under `~/code` or clones it with `gh`.                                                              |
+| **code-review**          | `/code-review [PR_URL \| --diff \| --uncommitted \| path]` | Review code using five specialized agents working in parallel, each focused on a different dimension (consistency, idiomatic Go, data correctness, security, architecture). |
+| **commit**               | `/commit`                                                  | Create git commits with intelligent file grouping based on staged/unstaged changes.                                                                                         |
+| **critique**             | `/critique`                                                | Critique a document for logical fallacies and structural weaknesses. Every issue includes a recommended fix.                                                                |
+| **delegate**             | `/delegate <task>`                                         | Spawn a named agent on a team to handle work in a parallel thread, preserving top-level context.                                                                            |
+| **go-api**               | `/go-api`                                                  | Generate a complete production-ready Go API service with boilerplate, local development setup, and observability.                                                           |
+| **go-testing**           | `/go-testing`                                              | Write unit and integration tests for Go services — table-driven tests, mocks, fuzz tests, and benchmarks.                                                                   |
+| **grepai**               | `/grepai`                                                  | Semantic code search by intent or concept (e.g. "where is rate limiting implemented") when exact names are unknown.                                                         |
+| **markdown-to-skill**    | `/markdown-to-skill`                                       | Bulk-convert Markdown files from a directory into valid Claude Code Skills.                                                                                                 |
+| **next-task**            | `/next-task [--skip-agents]`                               | Find the next unchecked task in a project plan and begin implementation. Delegates to an agent by default.                                                                  |
+| **refactor**             | `/refactor <feature or area>`                              | Analyze an existing feature and produce a reimplementation plan focused on reducing complexity and fragmentation.                                                           |
+| **research-plan**        | `/research-plan`                                           | Two-phase workflow: research topics deeply to produce reference docs, then create precise implementation plans.                                                             |
+| **systematic-debugging** | `/systematic-debugging`                                    | Four-phase debugging methodology emphasizing root cause analysis before any fix is attempted.                                                                               |
+| **test-feedback**        | `/test-feedback`                                           | Parse test failure output and spawn a background agent to fix the failing tests.                                                                                            |
+
 > [!NOTE]
 > If you need to generate Markdown files for the `markdown-to-skill` Skill, then
 > you can use [`rodydavis/agent-skills-generator`][agent-skills-generator].
