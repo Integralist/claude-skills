@@ -482,26 +482,60 @@ func (s *Service) CreateThing(ctx context.Context, params ServiceParams) (*Thing
 
 ## Repository Layer
 
-Transaction with deferred rollback; traced queries; metrics on duration.
+Wrap every repository method with `withDBMetrics` to get tracing, count, and
+duration metrics for free. The helper times the operation, records `dbOpsTotal`
+and `dbOpDuration` with operation/table/result labels, and derives the result
+from the returned error:
 
 ```go
-spanFunc := func(ctx context.Context) error {
-	tx, err := r.db.BeginTx(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("repository: failed to begin transaction: %w", err)
-	}
-	defer func() {
-		if err = tx.Rollback(); err != nil && !errors.Is(err, sql.ErrTxDone) {
-			r.logger.LogAttrs(ctx, slog.LevelError, "transaction_rollback",
-				slog.String("operation", "create_thing"),
-				slog.Any("err", err))
-		}
-	}()
+// withDBMetrics wraps a repository operation with tracing and DB metrics.
+func (r *MySQLRepository) withDBMetrics(ctx context.Context, span, operation, table string, fn func(ctx context.Context) error) error {
+	start := time.Now()
+	err := traces.WithSpan(ctx, r.Tracer, span, fn)
 
-	// ... queries
-	return tx.Commit()
+	result := resultSuccess
+	if err != nil {
+		result = resultError
+	}
+	r.Metric.dbOpsTotal.WithLabelValues(operation, table, result).Inc()
+	r.Metric.dbOpDuration.WithLabelValues(operation, table, result).Observe(time.Since(start).Seconds())
+
+	return err //nolint:wrapcheck
 }
-err := traces.WithSpan(ctx, r.tracer, "repository.CreateThing", spanFunc)
+```
+
+Repository methods pass a closure to `withDBMetrics`. Transactions use deferred
+rollback with rollback-error metrics:
+
+```go
+func (r *MySQLRepository) CreateConfig(ctx context.Context, config *Config) error {
+	return r.withDBMetrics(ctx, "repository.CreateConfig", "insert", "routing_configs",
+		func(ctx context.Context) error {
+			tx, err := r.DB.BeginTx(ctx, nil)
+			if err != nil {
+				return fmt.Errorf("repository: failed to begin transaction: %w", err)
+			}
+			defer func() {
+				if err = tx.Rollback(); err != nil && !errors.Is(err, sql.ErrTxDone) {
+					r.Logger.LogAttrs(ctx, slog.LevelError, "transaction_rollback",
+						slog.String("operation", "create_config"),
+						slog.String("config_id", config.ID),
+						slog.Any("err", err))
+					r.Metric.txErrors.WithLabelValues("create", "config").Inc()
+				}
+			}()
+
+			if err := r.insertConfigInTx(ctx, tx, config); err != nil {
+				return err
+			}
+			if err := r.insertConfigOwnershipInTx(ctx, tx, config); err != nil {
+				return err
+			}
+
+			return tx.Commit()
+		},
+	)
+}
 ```
 
 ## Middleware
