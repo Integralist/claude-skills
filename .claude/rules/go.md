@@ -159,8 +159,41 @@ func (c *Client) WithTimeout(d time.Duration) *Client {
 }
 ```
 
+### When to skip a constructor
+
+If `NewX` only assigns parameters to fields with no defaults, validation, or
+derived state, it is pointless indirection. Instantiate the struct directly at
+the call site instead:
+
+```go
+// Bad — constructor adds nothing.
+func NewRepository(db mysqlwrapper.Querier, r *redis.Client, l *slog.Logger, m *Metrics, tracer trace.Tracer) *MySQLRepository {
+	return &MySQLRepository{
+		db:     db,
+		logger: l,
+		metric: m,
+		redis:  r,
+		tracer: tracer,
+	}
+}
+
+// Good — direct instantiation.
+r := &MySQLRepository{
+	db:     db,
+	logger: logger,
+	metric: metrics,
+	redis:  redisClient,
+	tracer: tracer,
+}
+```
+
+A constructor earns its keep when it does something the caller cannot: setting
+defaults, validating inputs, or deriving internal state.
+
 ### When to use each pattern
 
+- **Direct instantiation** — constructor would only assign params to fields.
+  No indirection needed.
 - **Params struct** — constructor has >4 args (including `ctx`). Solves "too
   many arguments".
 - **`WithXxx` methods** — type has optional configuration with sensible
