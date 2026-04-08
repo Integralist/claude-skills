@@ -296,11 +296,11 @@ err := traces.WithSpan(ctx, s.tracer, "service.CreatePath", func(ctx context.Con
 })
 ```
 
-Record both count and duration metrics:
+Record both count and duration metrics via typed struct fields:
 
 ```go
-s.metrics.Count(ctx, "path_operations_total", "operation=create", "result="+result)
-s.metrics.Measure(ctx, "service_operation_duration_seconds", time.Since(start).Seconds(), "operation=create_path", "result="+result)
+s.metrics.pathOpsTotal.WithLabelValues("create", result).Inc()
+s.metrics.serviceOpDuration.WithLabelValues("create_path", result).Observe(time.Since(start).Seconds())
 ```
 
 ## Concurrency
@@ -334,25 +334,40 @@ Retrieve the cause with `context.Cause(ctx)` rather than checking `ctx.Err()` al
 
 ## Context Values
 
-Unexported struct keys; exported `WithXxx`/`XxxFromContext` helpers.
+Unexported struct keys; generic `WithValue`/`FromContext` helpers instead of
+per-type wrappers.
+
+Define the generic helpers once in a `contextx` (or similar) package:
+
+```go
+// WithValue sets a typed value into the context under the given key.
+func WithValue[T any](ctx context.Context, key any, val T) context.Context {
+	return context.WithValue(ctx, key, val)
+}
+
+// FromContext retrieves a typed value from the context.
+func FromContext[T any](ctx context.Context, key any) (T, bool) {
+	if v, ok := ctx.Value(key).(T); ok {
+		return v, true
+	}
+	var zero T
+	return zero, false
+}
+```
+
+Each context key is still an unexported struct type with an exported variable:
 
 ```go
 type customerIDCtxKey struct{}
 
 var CustomerIDContextKey = customerIDCtxKey{}
+```
 
-func WithCustomerID(ctx context.Context, customerID string) context.Context {
-	return context.WithValue(ctx, CustomerIDContextKey, customerID)
-}
+Usage:
 
-func CustomerIDFromContext(ctx context.Context) (string, bool) {
-	if v := ctx.Value(CustomerIDContextKey); v != nil {
-		if s, ok := v.(string); ok {
-			return s, ok
-		}
-	}
-	return "", false
-}
+```go
+ctx = contextx.WithValue(ctx, CustomerIDContextKey, "cust-123")
+id, ok := contextx.FromContext[string](ctx, CustomerIDContextKey)
 ```
 
 ## Testing
@@ -455,8 +470,8 @@ func (s *Service) CreateThing(ctx context.Context, params ServiceParams) (*Thing
 	if err != nil {
 		result = "error"
 	}
-	s.metrics.Count(ctx, "thing_operations_total", "operation=create", "result="+result)
-	s.metrics.Measure(ctx, "service_operation_duration_seconds", time.Since(start).Seconds(), "operation=create_thing", "result="+result)
+	s.metrics.thingOpsTotal.WithLabelValues("create", result).Inc()
+	s.metrics.serviceOpDuration.WithLabelValues("create_thing", result).Observe(time.Since(start).Seconds())
 
 	if err != nil {
 		return nil, err
