@@ -110,6 +110,16 @@ patterns, conventions, and preferences I want Claude to follow consistently.
 | **systematic-debugging** | `/systematic-debugging`                                    | Four-phase debugging methodology emphasizing root cause analysis before any fix is attempted.                                                                               |
 | **test-feedback**        | `/test-feedback`                                           | Parse test failure output and spawn a background agent to fix the failing tests.                                                                                            |
 
+> [!TIP]
+> I have the following workflow:\\
+>
+> - code-research
+> - research-plan
+> - next-task
+> - critique
+> - code-review
+> - refactor
+
 > [!NOTE]
 > If you need to generate Markdown files for the `markdown-to-skill` Skill, then
 > you can use [`rodydavis/agent-skills-generator`][agent-skills-generator].
