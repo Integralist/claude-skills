@@ -81,16 +81,47 @@ import (
 
 ## Error Handling
 
-- Sentinel errors as package-level `var`:
+Choose the error form based on how callers need to react:
+
+- **Sentinel errors** (`var ErrNotFound = ...`) — use when callers across
+  package boundaries need `errors.Is` checks to branch on the error. Don't
+  create sentinels for errors that only propagate up without inspection.
   ```go
   var ErrNotFound = errors.New("not found")
   ```
-- Wrap with layer prefix:
-  ```go
-  return nil, fmt.Errorf("service: failed to create config: %w", err)
-  ```
-- Custom error types implement `Error()` and `Unwrap()`.
+- **Wrapped errors** (`fmt.Errorf` with `%w`) — the default for most errors.
+  Adds context while preserving the chain.
+- **Custom error types** — use when callers need to extract structured data
+  from the error (e.g., HTTP status code, retry-after duration). Must
+  implement `Error()` and `Unwrap()`.
 - Classify errors for retry decisions (`errors.Is`, `errors.AsType`).
+
+### Error message prefixes
+
+Every wrapped error must start with a layer prefix so the origin is
+immediately obvious in logs. The prefix is the package or logical layer name,
+not the function name:
+
+```go
+// handler layer
+fmt.Errorf("handler: failed to decode request: %w", err)
+
+// service layer
+fmt.Errorf("service: failed to create config: %w", err)
+
+// repository layer
+fmt.Errorf("repository: failed to begin transaction: %w", err)
+
+// other packages use their package name
+fmt.Errorf("redis: transient error: %w", err)
+fmt.Errorf("cache: failed to marshal result: %w", err)
+fmt.Errorf("middleware: authentication failed: %w", err)
+```
+
+The format is `"<layer>: <what failed>: %w"`. Omit the package/type name
+that is already implied by the prefix (e.g., `"redis: failed to ping: %w"`
+not `"redis: failed to ping redis: %w"`).
+
 - Use `errors.AsType[T]` (Go 1.26+) instead of `errors.As`. It returns
   `(T, bool)` and avoids the need for a pre-declared target variable:
   ```go
@@ -258,6 +289,10 @@ tracer: otel.Tracer("internal.routeconfig.handlers"),
 
 ## Interfaces
 
+Define an interface when you need to swap implementations — typically for
+testing (mocks) or when multiple concrete backends exist. Do not introduce an
+interface to abstract a single concrete type that has no reason to vary.
+
 - Define at consumer side, not provider.
 - Place in `interface.go` when shared across packages.
 - Compile-time compliance check:
@@ -267,7 +302,12 @@ tracer: otel.Tracer("internal.routeconfig.handlers"),
 
 ## Logging
 
-Use `slog.LogAttrs`; snake_case event names; same event name for success and error (level distinguishes).
+Log at layer boundaries (handlers, service, repository) and error paths — not
+inside every function. Don't log what a caller already logs; if a service method
+logs an error before returning it, the handler should not log it again.
+
+Use `slog.LogAttrs`; snake_case event names; same event name for success and
+error (level distinguishes).
 
 ```go
 logger.LogAttrs(ctx, slog.LevelError, "create_config",
@@ -287,6 +327,12 @@ slog.Group("redis",
 
 ## Observability
 
+Add trace spans and metrics at layer boundaries — handler, service, and
+repository methods. Do not instrument internal helpers, pure functions, or
+methods that are already wrapped by their caller (e.g., a private
+`insertConfigInTx` called inside a repository method that already has a span
+via `withDBMetrics`).
+
 Wrap operations with trace spans using `layer.Operation` naming:
 
 ```go
@@ -305,6 +351,11 @@ s.metrics.serviceOpDuration.WithLabelValues("create_path", result).Observe(time.
 
 ## Concurrency
 
+Use goroutines for independent I/O-bound work where parallelism reduces
+latency (e.g., fanning out to multiple services). Do not parallelize
+CPU-bound sequential logic, operations that are already fast, or work with
+ordering dependencies.
+
 Prefer `wg.Go` (Go 1.25+) over manual `wg.Add`/`go`/`wg.Done`:
 
 ```go
@@ -318,7 +369,21 @@ wg.Wait()
 
 ## Context Cancellation
 
-Always use the `*Cause` variants so every cancellation carries a reason:
+Parent cancellation propagates automatically — only create a derived context
+when you have a concrete reason:
+
+- **`WithCancelCause`** — you spawn goroutines or fan-out work that must be
+  cancelled independently of the parent (e.g., cancel remaining goroutines on
+  first error).
+- **`WithTimeoutCause` / `WithDeadlineCause`** — you need a tighter deadline
+  than the parent provides (e.g., an RPC call that should fail faster than the
+  overall request).
+
+Do **not** wrap with `WithCancelCause` when you are simply passing context
+through a call chain — the parent's cancellation already reaches every child.
+
+When you do create a derived context, prefer the `*Cause` variants so every
+cancellation carries a reason:
 
 - `context.WithCancelCause` instead of `context.WithCancel`
 - `context.WithTimeoutCause` instead of `context.WithTimeout`
@@ -330,9 +395,15 @@ ctx, cancel := context.WithTimeoutCause(ctx, 5*time.Second, errors.New("service:
 defer cancel()
 ```
 
-Retrieve the cause with `context.Cause(ctx)` rather than checking `ctx.Err()` alone.
+Retrieve the cause with `context.Cause(ctx)` rather than checking `ctx.Err()`
+alone.
 
 ## Context Values
+
+Use context values for request-scoped metadata that crosses API boundaries
+(request ID, customer ID, auth claims). Do not use context values to pass
+function arguments or application configuration — those belong in function
+signatures or struct fields.
 
 Unexported struct keys; generic `WithValue`/`FromContext` helpers instead of
 per-type wrappers.
@@ -568,7 +639,13 @@ func (p *Pipeline) Decorate(next http.Handler) http.Handler {
 
 ## Caching
 
-Cache-aside with `CacheManager.CacheOrFetch()`. Use `singleflight.Group` to deduplicate concurrent fetches. Hierarchical keys: `prefix:customerID:resource:id`.
+Cache read-heavy, stable data that is accessed across multiple requests (e.g.,
+routing configs, feature flags). Do not cache request-scoped data,
+frequently-mutated data, or results that are cheap to recompute.
+
+Cache-aside with `CacheManager.CacheOrFetch()`. Use `singleflight.Group` to
+deduplicate concurrent fetches. Hierarchical keys:
+`prefix:customerID:resource:id`.
 
 ```go
 key := cm.HierarchicalKeyFor(customerID, "config", configID)
