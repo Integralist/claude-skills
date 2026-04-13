@@ -145,8 +145,8 @@ func NewService(repo *MySQLRepository, tracer trace.Tracer, logger *slog.Logger)
 }
 ```
 
-When a constructor has more than 4 parameters (including `ctx`), use a params
-struct instead:
+When a constructor has more than 4 parameters, use a params struct instead
+(`ctx` counts toward the total):
 
 ```go
 type ServiceParams struct {
@@ -272,8 +272,8 @@ unexported type.
 - **Trivial constructor (public package)** — constructor only assigns params
   to fields, but fields are unexported in a non-`internal/` package.
   Justified by Go's visibility rules, not by logic in the constructor.
-- **Params struct** — constructor has >4 args (including `ctx`). Solves "too
-  many arguments".
+- **Params struct** — constructor has >4 args (any kind, including `ctx`).
+  Solves "too many arguments".
 - **`WithXxx` methods** — type has optional configuration with sensible
   defaults. Solves "optional config with discoverable defaults". `NewX` takes
   only required params; `WithXxx` methods set optional fields.
