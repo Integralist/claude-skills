@@ -48,6 +48,23 @@ What do you want researched?
 
 ## Phase 1: Research
 
+### Check for existing research
+
+Before starting new research, scan `docs/research/` for
+documents that already cover the topic or a closely related
+one. Match broadly — a request about "CI pipeline caching"
+is covered by an existing `ci.md` or
+`continuous-integration.md`.
+
+- **Exact or near match found**: Read the document. If it
+  already covers what the user needs, skip to the "After
+  research completes" prompt. If it covers the topic
+  partially, extend it — add new sections or deepen
+  existing ones rather than creating a second file.
+- **No match found**: Proceed with new research below.
+
+### Conduct research
+
 Take the user's topic and study it deeply. Use every tool at
 your disposal: read source code, explore the codebase, fetch
 documentation via MCP, search the web, and check sibling
@@ -56,7 +73,8 @@ reference implementations or prior art.
 
 ### Output
 
-Write a detailed document to `docs/research/<topic-slug>.md`.
+Write to `docs/research/<topic-slug>.md` (new file) or
+extend the existing document identified above.
 
 Use this template:
 
