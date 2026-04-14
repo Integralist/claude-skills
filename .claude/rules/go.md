@@ -64,6 +64,98 @@ var cursorValues []string
 
 Only: `ctx`, `err`, `req`, `resp`, `cfg`.
 
+## Naming
+
+Names must be unambiguous without type annotations. Apply the **"delete the
+type" test**: if you removed the type from a declaration, could a reader still
+tell what it refers to? If not, the name is too generic.
+
+### Struct names
+
+Prefix with the domain or purpose when the bare name is generic. A package
+may contain multiple things that could be called "Client" or "Store" — the
+name must distinguish which one:
+
+```go
+// Bad — "Client" could be anything.
+type Client struct { ... }
+
+// Good — says what system it talks to.
+type DNSClient struct { ... }
+type VaultClient struct { ... }
+type PurgeClient struct { ... }
+```
+
+The exception is when the package itself already narrows the scope
+unambiguously (e.g., a `redis` package exporting `redis.Client` is clear).
+
+### Field and variable names
+
+Name by **role or target**, not by the Go type. When a struct holds a
+dependency, the field name should say what it connects to or what it does:
+
+```go
+// Bad — "client" mirrors the type, ambiguous if more are added.
+type PurgeService struct {
+	client *http.Client
+}
+
+// Good — says what the HTTP client is for.
+type PurgeService struct {
+	purgeAPI *http.Client
+}
+
+// Good — distinguishes when multiple clients exist.
+type Service struct {
+	dnsAPI   *http.Client
+	purgeAPI *http.Client
+	storage  ObjectStore
+}
+```
+
+The same applies to local variables:
+
+```go
+// Bad — two "client" variables distinguished only by type.
+client := newDNSClient()
+client2 := newPurgeClient()
+
+// Good — each name stands alone.
+dnsClient := newDNSClient()
+purgeClient := newPurgeClient()
+```
+
+### When generic names are acceptable
+
+A generic name is fine when there is exactly one of that concept in scope
+and the context makes it obvious:
+
+```go
+// Fine — only one logger, one tracer, one repo in this struct.
+type Service struct {
+	logger *slog.Logger
+	repo   *MySQLRepository
+	tracer trace.Tracer
+}
+```
+
+If a second instance of the same concept appears, rename **both** to be
+specific — don't leave one generic and suffix the other:
+
+```go
+// Bad — asymmetric, implies "repo" is the "real" one.
+type Service struct {
+	repo       *MySQLRepository
+	legacyRepo *PostgresRepository
+}
+
+// Good — both names explain what they hold.
+type Service struct {
+	configRepo *MySQLRepository
+	auditRepo  *PostgresRepository
+}
+```
+
 ## Imports
 
 Three groups separated by blank lines: stdlib, third-party, internal.
