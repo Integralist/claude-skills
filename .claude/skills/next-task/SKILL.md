@@ -85,9 +85,13 @@ directly in the main thread (`--skip-agents`).
 
 - You MUST confirm the plan choice before proceeding.
 - One task per invocation. Don't chain multiple tasks.
-- When using agent mode (default), you MUST use `TeamCreate` to
-  create a team and spawn the agent on it with `team_name`.
-- When using agent mode (default), you MUST NOT do the
+- Agent mode (default) delegates to an agent team. Use it when the
+  task is large enough to eat into main-thread context or when
+  multiple tasks can be parallelised. For tiny, self-contained
+  changes, do the work inline instead — no need to spawn an agent
+  for a one-line fix.
+- When delegating: you MUST use `TeamCreate` to create a team and
+  spawn the agent on it with `team_name`. You MUST NOT do the
   implementation work yourself.
 - When using `--skip-agents`, you MUST do the work directly — do
   not create teams or spawn agents.
