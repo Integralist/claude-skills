@@ -1,0 +1,94 @@
+{
+  "awsAuthRefresh": "aws sso login --profile bedrock",
+  "env": {
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "global.anthropic.claude-opus-4-6-v1",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "global.anthropic.claude-sonnet-4-6",
+    "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-6-v1",
+    "AWS_PROFILE": "bedrock",
+    "AWS_REGION": "us-east-2",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_USE_BEDROCK": "1"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "defaultMode": "plan"
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "terminal-notifier -message \"Claude Code needs your input\" -sound Sosumi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "terminal-notifier -message \"Claude Code finished\" -sound default"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/log-session-cost.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/scripts/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "insecure-defaults@trailofbits": true,
+    "ask-questions-if-underspecified@trailofbits": true,
+    "differential-review@trailofbits": true,
+    "sharp-edges@trailofbits": true,
+    "commit@fastly-agent-skills-internal": true,
+    "delegate@fastly-agent-skills-internal": true,
+    "google-workspace@fastly-agent-skills-internal": true,
+    "is-it-safe-to-run@fastly-agent-skills-internal": true,
+    "atlassian@claude-plugins-official": true,
+    "code-review@fastly-agent-skills-internal": false,
+    "fastly-agent-skills@fastly-agent-toolkit": true
+  },
+  "extraKnownMarketplaces": {
+    "fastly-agent-toolkit": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/fastly/fastly-agent-toolkit.git"
+      }
+    }
+  },
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "medium",
+  "viewMode": "verbose",
+  "showThinkingSummaries": true,
+  "spinnerVerbs": {
+    "mode": "replace",
+    "verbs": [
+      "Thinking"
+    ]
+  }
+}
