@@ -1,25 +1,88 @@
-# Claude Code Configuration
+# Agent Skills Configuration
 
-This repository contains my **global Claude Code configuration** — skills,
-agents, and project instructions designed to be used across all projects when
-working with Claude AI.
+This repository contains **global agent configuration** — skills, agents, rules,
+and project instructions designed to be used across all projects when working
+with AI coding assistants.
+
+It serves two targets:
+
+- **Claude Code** — reads `.claude/` (skills, agents, rules, CLAUDE.md)
+- **Generic Agent Skills** (e.g. Swival) — reads `.agents/` (skills, AGENTS.md)
+
+Skills exist in both locations. The `.claude/` versions use Claude-specific
+primitives (TeamCreate, SendMessage, allowed-tools). The `.agents/` versions use
+platform-agnostic language (subagents, role descriptions) so any compatible CLI
+can use them.
+
+## Install
+
+```bash
+# Claude Code only
+make install-claude
+
+# Generic agents only (e.g. Swival)
+make install-agents
+
+# Both
+make install
+```
+
+## Structure
+
+```plain
+.claude/                            # Claude Code (primary)
+├── CLAUDE.md                       # Global project instructions
+├── agents/
+│   └── code-improvement-reviewer.md
+├── rules/
+│   ├── go.md                       # Go conventions (auto-loaded for *.go)
+│   └── markdown.md                 # Markdown conventions (auto-loaded for *.md)
+└── skills/
+    ├── brevity/
+    ├── cleanup/
+    ├── code-review/
+    ├── commit/
+    ├── critique/
+    ├── delegate/
+    ├── go-api/
+    ├── go-testing/
+    ├── grepai/
+    ├── markdown-to-skill/          # Claude-only (not in .agents/)
+    ├── next-task/
+    ├── refactor/
+    ├── research-plan/
+    ├── systematic-debugging/
+    └── test-feedback/
+
+.agents/                            # Generic Agent Skills
+├── AGENTS.md                       # Shared conventions
+└── skills/
+    ├── brevity/
+    ├── cleanup/                    # Rewritten: teams → subagents
+    ├── code-review/                # Rewritten: teams → subagents
+    ├── commit/                     # Minor phrasing tweaks
+    ├── critique/
+    ├── delegate/                   # Rewritten: generic roles
+    ├── go-api/
+    ├── go-conventions/             # New: rule → skill
+    ├── go-testing/
+    ├── grepai/
+    ├── markdown-conventions/       # New: rule → skill
+    ├── next-task/                  # Rewritten: teams → subagents
+    ├── refactor/                   # Rewritten: teams → subagents
+    ├── research-plan/              # Rewritten: teams → subagents
+    ├── systematic-debugging/
+    └── test-feedback/              # Minor phrasing tweaks
+```
 
 ## Components
 
-### Skills (`skills/`)
+### Skills
 
-[Claude Code Skills](https://code.claude.com/docs/en/skills) are custom code
-capabilities that extend Claude's ability to perform specific tasks, follow
-particular patterns, or apply specialized knowledge. Skills act as reusable
-instructions invoked with `/skill-name`.
-
-Skills can include:
-
-- **Coding conventions** and style preferences
-- **Architecture patterns** and best practices
-- **Testing strategies** and patterns
-- **Framework-specific** patterns and idioms
-- **Domain-specific** knowledge and approaches
+[Skills](https://code.claude.com/docs/en/skills) are custom code capabilities
+that extend an agent's ability to perform specific tasks, follow particular
+patterns, or apply specialized knowledge. Skills act as reusable instructions
+invoked with `/skill-name`.
 
 ### Agents (`.claude/agents/`)
 
@@ -39,114 +102,62 @@ are modular, topic-specific instruction files that Claude loads automatically.
 Unlike skills (which are invoked explicitly), rules apply passively — scoped to
 file patterns via YAML frontmatter `paths` globs.
 
-Current rules:
+In `.agents/`, rules are converted to skills (`go-conventions`,
+`markdown-conventions`) since generic agents don't support path-scoped
+auto-loading.
 
-- **go.md** — Go coding conventions: struct layout, error handling, logging,
-  observability, testing, and layer separation. Scoped to `**/*.go`.
-- **markdown.md** — Markdown formatting, code blocks, and inclusive language
-  linting. Scoped to `**/*.md`.
+### Project Instructions
 
-### Project Instructions (`.claude/CLAUDE.md`)
+- `.claude/CLAUDE.md` — Claude Code global instructions
+- `.agents/AGENTS.md` — Generic agent global conventions
 
-The [CLAUDE.md file](https://code.claude.com/docs/en/memory#claudemd) defines
-working relationship preferences and tooling guidelines that apply globally.
-This includes:
+## Skill Reference
 
-- Communication style (concise, no sycophancy)
-- Tooling preferences (prefer Makefile targets, use Edit over sed)
-- Collaboration norms (challenge assumptions, do things right)
+| Skill | Description |
+| --- | --- |
+| **brevity** | Ultra-compressed communication with 3 intensity levels |
+| **cleanup** | Audit codebase for AI slop via background subagent |
+| **code-review** | Multi-dimensional review via parallel subagents |
+| **commit** | Git commits with intelligent file grouping |
+| **critique** | Critique a document for logical fallacies |
+| **delegate** | Spawn a subagent for a task |
+| **go-api** | Generate a production-ready Go API service |
+| **go-conventions** | Go coding conventions (.agents/ only) |
+| **go-testing** | Write Go tests — table-driven, fuzz, benchmarks |
+| **grepai** | Semantic code search by intent |
+| **markdown-conventions** | Markdown formatting conventions (.agents/ only) |
+| **markdown-to-skill** | Bulk-convert Markdown to skills (.claude/ only) |
+| **next-task** | Continue working through a project plan |
+| **refactor** | Analyze a feature and produce a reimplementation plan |
+| **research-plan** | Research topics deeply, then create implementation plans |
+| **systematic-debugging** | Four-phase debugging with root cause analysis |
+| **test-feedback** | Parse test failures and fix them in a background subagent |
 
-## Global Configuration
+## Differences Between .claude/ and .agents/
 
-Everything in this repository is intended to be **global** — applying across all
-projects rather than being specific to a single codebase. These are universal
-patterns, conventions, and preferences I want Claude to follow consistently.
-
-## Structure
-
-```plain
-.claude/
-├── CLAUDE.md           # Global project instructions
-├── agents/
-│   └── *.md            # Custom agent definitions
-├── rules/
-│   ├── go.md           # Go conventions
-│   └── markdown.md     # Markdown linting
-└── skills/
-    ├── brevity/
-    ├── cleanup/
-    ├── code-review/
-    ├── commit/
-    ├── critique/
-    ├── delegate/
-    ├── go-api/
-    ├── go-testing/
-    ├── grepai/
-    ├── markdown-to-skill/
-    ├── next-task/
-    ├── refactor/
-    ├── research-plan/
-    ├── systematic-debugging/
-    └── test-feedback/
-```
-
-### Skill Reference
-
-| Skill                    | Invocation                                                 | Description                                                                                                                                                                 |
-| ------------------------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [**brevity**](.claude/skills/brevity/SKILL.md)                         | `/brevity [lite \| full \| ultra \| off]`                  | Ultra-compressed communication mode with 3 intensity levels. Drops filler while keeping full technical accuracy.                                                            |
-| [**cleanup**](.claude/skills/cleanup/SKILL.md)                         | `/cleanup [path \| glob]`                                  | Audit a codebase for AI slop. Fixes obvious issues directly and flags anything that would change behavior. Runs as a background agent.                                      |
-| [**code-review**](.claude/skills/code-review/SKILL.md)                | `/code-review [PR_URL \| --diff \| --uncommitted \| path]` | Review code using six specialized agents working in parallel, each focused on a different dimension (consistency, idiomatic Go, data correctness, security, architecture, documentation). |
-| [**commit**](.claude/skills/commit/SKILL.md)                          | `/commit`                                                  | Create git commits with intelligent file grouping based on staged/unstaged changes.                                                                                         |
-| [**critique**](.claude/skills/critique/SKILL.md)                      | `/critique`                                                | Critique a document for logical fallacies and structural weaknesses. Every issue includes a recommended fix.                                                                |
-| [**delegate**](.claude/skills/delegate/SKILL.md)                      | `/delegate <task>`                                         | Spawn a named agent on a team to handle work in a parallel thread, preserving top-level context.                                                                            |
-| [**go-api**](.claude/skills/go-api/SKILL.md)                          | `/go-api`                                                  | Generate a complete production-ready Go API service with boilerplate, local development setup, and observability.                                                           |
-| [**go-testing**](.claude/skills/go-testing/SKILL.md)                  | `/go-testing`                                              | Write unit and integration tests for Go services — table-driven tests, mocks, fuzz tests, and benchmarks.                                                                   |
-| [**grepai**](.claude/skills/grepai/SKILL.md)                          | `/grepai`                                                  | Semantic code search by intent or concept (e.g. "where is rate limiting implemented") when exact names are unknown.                                                         |
-| [**markdown-to-skill**](.claude/skills/markdown-to-skill/SKILL.md)    | `/markdown-to-skill`                                       | Bulk-convert Markdown files from a directory into valid Claude Code Skills.                                                                                                 |
-| [**next-task**](.claude/skills/next-task/SKILL.md)                    | `/next-task [--skip-agents]`                               | Find the next unchecked task in a project plan and begin implementation. Delegates to an agent by default.                                                                  |
-| [**refactor**](.claude/skills/refactor/SKILL.md)                      | `/refactor <feature or area>`                              | Analyze an existing feature and produce a reimplementation plan focused on reducing complexity and fragmentation.                                                           |
-| [**research-plan**](.claude/skills/research-plan/SKILL.md)            | `/research-plan`                                           | Two-phase workflow: research topics or repos deeply to produce reference docs, then create precise implementation plans. Also handles repo-by-name research (e.g. "check the spotless repo"). |
-| [**systematic-debugging**](.claude/skills/systematic-debugging/SKILL.md) | `/systematic-debugging`                                    | Four-phase debugging methodology emphasizing root cause analysis before any fix is attempted.                                                                               |
-| [**test-feedback**](.claude/skills/test-feedback/SKILL.md)            | `/test-feedback`                                           | Parse test failure output and spawn a background agent to fix the failing tests.                                                                                            |
-
-> [!NOTE]
-> If you need to generate Markdown files for the `markdown-to-skill` Skill, then
-> you can use [`rodydavis/agent-skills-generator`][agent-skills-generator].
-
-```shell
-git clone https://github.com/rodydavis/agent-skills-generator.git
-
-cd agent-skills-generator
-
-cat <<EOF > .skillcontext
-https://www.fastly.com/documentation/developers/*
-https://docs.fastly.com/*
-EOF
-
-go run main.go crawl
-```
+| Aspect | `.claude/` | `.agents/` |
+| --- | --- | --- |
+| Orchestration | TeamCreate, SendMessage, TaskCreate | "Spawn a subagent" with role descriptions |
+| Rules | Auto-loaded by file path glob | Converted to explicit skills |
+| Prompting | AskUserQuestion with options | "Present numbered options and wait" |
+| Frontmatter | user-invocable, argument-hint, allowed-tools | name, description only |
+| markdown-to-skill | Included | Omitted (uses Claude-only features) |
+| code-review dimensions | 6 (consistency, Go, data, security, arch, docs) | 4 (consistency, data, security, Go) |
 
 ## Workflow
 
-I have the following workflow (you can skip items if they're not necessary):
-
-- research-plan (creates `docs/research/{topic-or-repo}.md` + `docs/plans/{project}.md` documents)
-- critique (reviews plans and highlights issues)
-- next-task (finds latest plan and starts next task)
-- commit (commit code changes; or you can do at the end)
-- code-review (reviews implementation code)
-- cleanup (cleans up obvious AI code; like verbose code comments)
-- refactor (redesigns a code feature)
+- research-plan → critique → next-task → commit → code-review → cleanup →
+  refactor
 
 ## Contributing
 
 When adding to this repository:
 
 1. Ensure additions are truly **global** and applicable across multiple projects
-1. Write clear, concise descriptions to ensure Claude interprets them accurately.
+1. Write clear, concise descriptions to ensure accurate interpretation
 1. Include examples where helpful
 1. Avoid project-specific details or configurations
+1. Create both `.claude/` and `.agents/` versions for new skills
 1. Test with Claude to ensure the desired behavior
 
 ## License
@@ -158,5 +169,3 @@ use and adapt these skills for your own projects.
 
 I have a global gitignore that prevents `.claude/` from being committed. So I
 have to `git add -f .claude/` every time I make a change.
-
-[agent-skills-generator]: https://github.com/rodydavis/agent-skills-generator

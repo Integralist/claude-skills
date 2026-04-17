@@ -1,0 +1,276 @@
+---
+name: go-conventions
+description: >-
+  Go coding conventions and style guide. Use whenever editing,
+  reviewing, or creating Go files (*.go). Covers naming, error
+  handling, testing, HTTP handlers, caching, concurrency, and
+  observability.
+---
+
+We are peers writing Go. Prioritize correctness, clarity, and
+best practices.
+
+## Tooling
+
+After editing Go files, run the following linters to catch
+issues before committing:
+
+- `go vet ./...`
+- `go-critic check ./...` (if not installed:
+  `go install -v github.com/go-critic/go-critic/cmd/go-critic@latest`)
+- `staticcheck ./...` (if not installed:
+  `go install honnef.co/go/tools/cmd/staticcheck@latest`)
+
+Fix any reported issues before considering the task complete.
+
+## Formatting
+
+After editing Go files, run `gofumpt` to format all changed
+files:
+
+```bash
+gofumpt -l -w .
+```
+
+If not installed: `go install mvdan.cc/gofumpt@latest`
+
+## Structs
+
+- Fields sorted alphabetically; embedded structs first.
+- JSON tags on exported fields; `json:"-"` for internal-only
+  fields.
+- Pointer fields when nil means "not provided" (partial
+  updates).
+
+```go
+type Service struct {
+    cacheManager *CacheManager
+    logger       *slog.Logger
+    metrics      *metrics.Metrics
+    repo         *MySQLRepository
+    tracer       trace.Tracer
+}
+```
+
+## Variables
+
+Group consecutive `var` declarations into a single block:
+
+```go
+// Good
+var (
+    direction    string
+    cursorValues []string
+)
+
+// Bad
+var direction string
+var cursorValues []string
+```
+
+## Abbreviations
+
+Only: `ctx`, `err`, `req`, `resp`, `cfg`.
+
+## Naming
+
+Names must be unambiguous without type annotations. Apply the
+**"delete the type" test**: if you removed the type from a
+declaration, could a reader still tell what it refers to? If
+not, the name is too generic.
+
+### Struct names
+
+Prefix with the domain or purpose when the bare name is
+generic:
+
+```go
+// Bad — "Client" could be anything.
+type Client struct { ... }
+
+// Good — says what system it talks to.
+type DNSClient struct { ... }
+type VaultClient struct { ... }
+type PurgeClient struct { ... }
+```
+
+### Field and variable names
+
+Name by **role or target**, not by the Go type:
+
+```go
+// Bad
+type PurgeService struct {
+    client *http.Client
+}
+
+// Good
+type PurgeService struct {
+    purgeAPI *http.Client
+}
+```
+
+### When generic names are acceptable
+
+A generic name is fine when there is exactly one of that
+concept in scope and the context makes it obvious:
+
+```go
+type Service struct {
+    logger *slog.Logger
+    repo   *MySQLRepository
+    tracer trace.Tracer
+}
+```
+
+If a second instance appears, rename **both** to be specific.
+
+## Imports
+
+Three groups separated by blank lines: stdlib, third-party,
+internal.
+
+```go
+import (
+    "context"
+    "fmt"
+
+    "go.opentelemetry.io/otel/trace"
+
+    "github.com/fastly/blue-ribbon/internal/metrics"
+)
+```
+
+## Error Handling
+
+Choose the error form based on how callers need to react:
+
+- **Sentinel errors** (`var ErrNotFound = ...`) — use when
+  callers across package boundaries need `errors.Is` checks.
+- **Wrapped errors** (`fmt.Errorf` with `%w`) — the default.
+- **Custom error types** — use when callers need to extract
+  structured data from the error.
+- Classify errors for retry decisions (`errors.Is`,
+  `errors.AsType`).
+
+### Error message prefixes
+
+Every wrapped error must start with a layer prefix:
+
+```go
+fmt.Errorf("handler: failed to decode request: %w", err)
+fmt.Errorf("service: failed to create config: %w", err)
+fmt.Errorf("repository: failed to begin transaction: %w", err)
+```
+
+The format is `"<layer>: <what failed>: %w"`.
+
+- Use `errors.AsType[T]` (Go 1.26+) instead of `errors.As`.
+- Never panic; return errors.
+
+## Constructors
+
+NewX factories with dependency injection. Fields assigned
+alphabetically.
+
+When a constructor has more than 4 parameters, use a params
+struct instead.
+
+For types with required parameters plus optional configuration
+with sensible defaults, use `WithXxx` method chaining.
+
+### When to skip a constructor
+
+If `NewX` only assigns parameters to fields with no defaults,
+validation, or derived state, it is pointless indirection.
+Instantiate the struct directly at the call site instead.
+
+A constructor earns its keep when it does something the caller
+cannot: setting defaults, validating inputs, deriving internal
+state, providing access to unexported fields across public
+package boundaries, or providing access to an unexported type.
+
+## Interfaces
+
+Define an interface when you need to swap implementations —
+typically for testing or when multiple concrete backends exist.
+
+- Define at consumer side, not provider.
+- Place in `interface.go` when shared across packages.
+- Compile-time compliance check:
+  ```go
+  var _ redis.Client = (*MockRedisClient)(nil)
+  ```
+
+## Logging
+
+Log at layer boundaries and error paths — not inside every
+function. Use `slog.LogAttrs`; snake_case event names.
+
+```go
+logger.LogAttrs(ctx, slog.LevelError, "create_config",
+    slog.String("config_id", configID),
+    slog.Any("err", err),
+)
+```
+
+## Observability
+
+Add trace spans and metrics at layer boundaries — handler,
+service, and repository methods. Do not instrument internal
+helpers.
+
+```go
+err := traces.WithSpan(ctx, s.tracer, "service.CreatePath",
+    func(ctx context.Context) error {
+        traces.AddAttributesToCurrentSpan(ctx,
+            attribute.String("config_id", configID))
+        return nil
+    })
+```
+
+## Concurrency
+
+Prefer `wg.Go` (Go 1.25+) over manual `wg.Add`/`go`/`wg.Done`:
+
+```go
+var wg sync.WaitGroup
+wg.Go(func() { /* task */ })
+wg.Go(func() { /* task */ })
+wg.Wait()
+```
+
+## Context
+
+- Only create derived contexts when you have a concrete reason
+  (cancel goroutines, tighter deadlines).
+- Prefer `*Cause` variants (`WithCancelCause`,
+  `WithTimeoutCause`, `WithDeadlineCause`).
+- Use context values for request-scoped metadata only.
+
+## Testing
+
+Table-driven tests with `testCases` slice and `t.Run`. Use
+`testify/mock` for mock implementations. Build tag `e2e` for
+integration tests.
+
+## HTTP Handlers
+
+Struct with logger, metrics, service. Factory `NewHandlers`.
+Routes registered via `RegisterRoutes(mux, pipeline, cfg)`.
+Errors as RFC 7807 Problem Details.
+
+## Layer Separation
+
+handlers -> service -> repository. Business logic in service,
+data access in repository. Never skip layers.
+
+## File Naming
+
+- `handlers.go` + `handlers_*.go`
+- `service.go` + `service_*.go`
+- `repository.go` + `repository_*.go`
+- `model.go` for domain types
+- `interface.go` for shared interfaces
+- `doc.go` for package-level comment
+- `README.md` for every package
