@@ -7,17 +7,27 @@ description: >-
   stale code references. Use when writing new documentation
   from scratch or reviewing and rewriting existing documents
   for clarity and quality.
+user-invocable: true
+argument-hint: '--new <topic> | --improve <file>'
 ---
 
-# Improve Technical Documentation
+# Technical Documentation
 
 Write new or improve existing technical documentation.
 Apply the five documentation pillars below to reduce
 friction for the reader and produce a concrete document.
 
+## Mode Selection
+
+- `--new <topic>` — write a new document from scratch
+- `--improve <file>` — review and rewrite an existing document
+
+If neither flag is provided, infer from context. If still
+ambiguous, ask the user which mode they want.
+
 ## Process
 
-### When improving an existing document
+### When improving an existing document (`--improve`)
 
 1. **Prompt for the file:**
 
@@ -40,7 +50,7 @@ friction for the reader and produce a concrete document.
 1. **Present a change summary.** After the rewrite, list what
    changed and why, organized by pillar.
 
-### When writing a new document
+### When writing a new document (`--new`)
 
 1. **Clarify scope.** Confirm the topic, audience, and purpose
    of the document with the user.
