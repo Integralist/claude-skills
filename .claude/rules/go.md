@@ -854,6 +854,40 @@ const (
 var AllConditionTypes = []ConditionType{HeaderCondition, GeoCondition}
 ```
 
+## Standard Library Preferences
+
+Prefer newer stdlib packages over their older equivalents in new code. When
+editing existing code that uses an older API listed below, ask the user
+whether they want to migrate it to the newer equivalent before proceeding.
+
+### `net/netip` over `net` for IP types (Go 1.18+)
+
+The `net/netip` package provides value-typed, comparable, allocation-free
+replacements for the pointer-heavy types in `net`:
+
+| Old (`net`)  | New (`net/netip`) | Benefit                           |
+| ------------ | ----------------- | --------------------------------- |
+| `net.IP`     | `netip.Addr`      | Value type, comparable, no allocs |
+| `net.IPNet`  | `netip.Prefix`    | Value type, comparable            |
+| —            | `netip.AddrPort`  | IP+port as a single value type    |
+
+```go
+// Bad — pointer-based, not comparable.
+var cidr *net.IPNet
+
+// Good — value type, usable as map key.
+var prefix netip.Prefix
+```
+
+Convert at boundaries when interacting with APIs that still use `net` types:
+
+```go
+addr := netip.MustParseAddr("10.0.0.1")
+stdIP := addr.AsSlice() // -> net.IP for legacy APIs
+
+stdAddr, ok := netip.AddrFromSlice(legacyIP) // net.IP -> netip.Addr
+```
+
 ## Layer Separation
 
 handlers -> service -> repository. Business logic in service, data access in repository. Never skip layers.
