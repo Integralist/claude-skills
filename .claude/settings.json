@@ -1,10 +1,10 @@
 {
   "awsAuthRefresh": "aws sso login --profile bedrock",
   "env": {
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "global.anthropic.claude-opus-4-6-v1",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "global.anthropic.claude-opus-4-7",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "global.anthropic.claude-sonnet-4-6",
-    "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-6-v1",
+    "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-7",
     "AWS_PROFILE": "bedrock",
     "AWS_REGION": "us-east-2",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
@@ -81,14 +81,13 @@
       }
     }
   },
-  "alwaysThinkingEnabled": true,
-  "effortLevel": "medium",
   "viewMode": "verbose",
-  "showThinkingSummaries": true,
   "spinnerVerbs": {
     "mode": "replace",
     "verbs": [
       "Thinking"
     ]
-  }
+  },
+  "alwaysThinkingEnabled": true,
+  "showThinkingSummaries": true
 }
