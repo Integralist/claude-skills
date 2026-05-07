@@ -23,8 +23,13 @@ else
     model_name=$(echo "${input}" | jq -r '.model.display_name')
 fi
 
-# Get current time
-current_time=$(date +%H:%M:%S)
+# Effort level (absent when the model doesn't support it)
+effort_level=$(echo "${input}" | jq -r '.effort.level // empty')
+if [[ -n "${effort_level}" ]]; then
+    model_suffix="${effort_level} · ${output_style}"
+else
+    model_suffix="${output_style}"
+fi
 
 # Get current directory basename
 dir_name=$(basename "$current_dir")
@@ -128,13 +133,12 @@ fi
 
 # Build the status line, now including the AWS session info
 # Uses Nerd Fonts private-use Unicode glyphs (see: https://www.nerdfonts.com/cheat-sheet)
-printf "⏰ %s │ 📁 %s%s%s%s │ 🤖 %s (%s)%s%s" \
-    "$current_time" \
+printf "🤖 %s (%s)%s%s │ 📁 %s%s%s%s" \
+    "$model_name" \
+    "$model_suffix" \
+    "${context_info}" \
+    "${cost_info}" \
     "$dir_name" \
     "$git_info" \
     "$lang_info" \
     "$aws_info" \
-    "$model_name" \
-    "$output_style" \
-    "${context_info}" \
-    "${cost_info}" \
