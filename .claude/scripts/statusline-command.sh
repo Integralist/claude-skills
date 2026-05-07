@@ -25,10 +25,25 @@ fi
 
 # Effort level (absent when the model doesn't support it)
 effort_level=$(echo "${input}" | jq -r '.effort.level // empty')
-if [[ -n "${effort_level}" ]]; then
-    model_suffix="${effort_level} · ${output_style}"
+
+# Treat the built-in "default" output style as empty so it doesn't clutter the suffix.
+style_label=""
+if [[ "${output_style}" != "default" && -n "${output_style}" && "${output_style}" != "null" ]]; then
+    style_label="${output_style}"
+fi
+
+if [[ -n "${effort_level}" && -n "${style_label}" ]]; then
+    model_suffix="${effort_level} · ${style_label}"
+elif [[ -n "${effort_level}" ]]; then
+    model_suffix="${effort_level}"
 else
-    model_suffix="${output_style}"
+    model_suffix="${style_label}"
+fi
+
+if [[ -n "${model_suffix}" ]]; then
+    model_display="${model_name} (${model_suffix})"
+else
+    model_display="${model_name}"
 fi
 
 # Get current directory basename
@@ -133,9 +148,8 @@ fi
 
 # Build the status line, now including the AWS session info
 # Uses Nerd Fonts private-use Unicode glyphs (see: https://www.nerdfonts.com/cheat-sheet)
-printf "🤖 %s (%s)%s%s │ 📁 %s%s%s%s" \
-    "$model_name" \
-    "$model_suffix" \
+printf "🤖 %s%s%s │ 📁 %s%s%s%s" \
+    "$model_display" \
     "${context_info}" \
     "${cost_info}" \
     "$dir_name" \
