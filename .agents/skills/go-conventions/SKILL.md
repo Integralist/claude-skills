@@ -117,6 +117,14 @@ gofumpt -l -w .
 
 If not installed: `go install mvdan.cc/gofumpt@latest`
 
+Then run `goimports-reviser` to organize and group imports:
+
+```bash
+goimports-reviser -company-prefixes github.com/fastly -project-name $(shell go list -m) ./...
+```
+
+If not installed: `go install github.com/incu6us/goimports-reviser/v3`
+
 ## Structs
 
 - Fields sorted alphabetically; embedded structs first.
