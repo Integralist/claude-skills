@@ -449,6 +449,28 @@ new code. When editing existing code that uses an older API
 listed below, ask the user whether they want to migrate it to
 the newer equivalent before proceeding.
 
+### Use stdlib constants over magic literals
+
+When the stdlib defines a named constant, use it instead of a
+string or numeric literal. The constant documents intent and
+catches typos at compile time — `http.MethodGot` is a compile
+error; `"GOT"` is a bug.
+
+```go
+// Bad
+req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+if resp.StatusCode == 200 { ... }
+
+// Good
+req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+if resp.StatusCode == http.StatusOK { ... }
+```
+
+Common constants to reach for: `http.Method*`, `http.Status*`,
+`os.Interrupt`/`syscall.SIG*`, `os.ModePerm`, `time.Second` et
+al. When a repeated literal has no stdlib constant (e.g.
+`"application/json"`), define a package-level `const`.
+
 ### `net/netip` over `net` for IP types (Go 1.18+)
 
 The `net/netip` package provides value-typed, comparable,
