@@ -38,6 +38,7 @@ make install
 │   ├── go.md                       # Go conventions (auto-loaded for *.go)
 │   └── markdown.md                 # Markdown conventions (auto-loaded for *.md)
 └── skills/
+    ├── agents-md/
     ├── brevity/
     ├── cleanup/
     ├── code-review/
@@ -58,6 +59,7 @@ make install
 .agents/                            # Generic Agent Skills
 ├── AGENTS.md                       # Shared conventions
 └── skills/
+    ├── agents-md/
     ├── brevity/
     ├── cleanup/                    # Rewritten: teams → subagents
     ├── code-review/                # Rewritten: teams → subagents
@@ -117,6 +119,7 @@ auto-loading.
 
 | Skill                    | Description                                                             |
 | ------------------------ | ----------------------------------------------------------------------- |
+| **agents-md**            | Make AGENTS.md canonical; stub CLAUDE.md/GEMINI.md as @-import pointers |
 | **brevity**              | Ultra-compressed communication with 3 intensity levels                  |
 | **cleanup**              | Audit codebase for AI slop via background subagent                      |
 | **code-review**          | Multi-dimensional review via parallel subagents                         |
