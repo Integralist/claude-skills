@@ -126,6 +126,9 @@ include them: `.claude/`, `.cursorrules`, `.cursorignore`,
 - State what changed and why
 - Use counts: "3 files" not "several files"
 - Active voice, specific language
+- If `~/.gitcommit` exists, read it for the user's preferred
+  commit-message conventions (type prefixes, scopes, subject
+  style, examples) and follow them
 
 ## Safety
 
