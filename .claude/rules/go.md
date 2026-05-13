@@ -827,6 +827,28 @@ httpx.WriteJSON(ctx, logger, w, http.StatusNotFound, problem)
 
 ## Service Layer
 
+- Service methods take `(ctx, In)` and return `(Out, error)` where `In` and
+  `Out` are plain domain structs with no transport-specific tags (no `json:`,
+  no protobuf, no HTTP types). This keeps the service reusable across
+  transports and test harnesses, and makes the signature uniform so future
+  adapters (e.g. a second transport) can wrap every method the same way.
+- Put input validation on the input struct as a `Validate() error` method,
+  not inline in the service method body. The service calls `in.Validate()`
+  as the first step inside the trace span. Handlers may also invoke it
+  between decode and the service call to fail fast on wire-level errors.
+  ```go
+  type CreateConfigIn struct {
+      CustomerID string
+      Name       string
+  }
+
+  func (in CreateConfigIn) Validate() error {
+      if in.CustomerID == "" {
+          return errorsx.Invalid("customer_id is required")
+      }
+      return nil
+  }
+  ```
 - Trace-wrap the operation; metrics outside the span.
 - Validate at service boundary; return validation errors.
 

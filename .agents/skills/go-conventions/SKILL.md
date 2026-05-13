@@ -442,6 +442,32 @@ Struct with logger, metrics, service. Factory `NewHandlers`.
 Routes registered via `RegisterRoutes(mux, pipeline, cfg)`.
 Errors as RFC 7807 Problem Details.
 
+## Service Layer
+
+- Service methods take `(ctx, In)` and return `(Out, error)`
+  where `In` and `Out` are plain domain structs with no
+  transport-specific tags (no `json:`, no protobuf, no HTTP
+  types). Keeps the service reusable across transports and
+  test harnesses.
+- Put input validation on the input struct as a `Validate()
+  error` method, not inline in the service method body. The
+  service calls `in.Validate()` as the first step inside the
+  trace span.
+  ```go
+  type CreateConfigIn struct {
+      CustomerID string
+      Name       string
+  }
+
+  func (in CreateConfigIn) Validate() error {
+      if in.CustomerID == "" {
+          return errorsx.Invalid("customer_id is required")
+      }
+      return nil
+  }
+  ```
+- Trace-wrap the operation; metrics outside the span.
+
 ## Standard Library Preferences
 
 Prefer newer stdlib packages over their older equivalents in
