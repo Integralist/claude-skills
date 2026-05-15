@@ -49,6 +49,7 @@ make install
     ├── go-testing/
     ├── grepai/
     ├── grill-me/
+    ├── grill-with-docs/
     ├── markdown-to-skill/          # Claude-only (not in .agents/)
     ├── next-task/
     ├── refactor/
@@ -72,6 +73,7 @@ make install
     ├── go-testing/
     ├── grepai/
     ├── grill-me/
+    ├── grill-with-docs/
     ├── markdown-conventions/       # New: rule → skill
     ├── next-task/                  # Rewritten: teams → subagents
     ├── refactor/                   # Rewritten: teams → subagents
@@ -133,6 +135,7 @@ auto-loading.
 | **go-testing**           | Write Go tests — table-driven, fuzz, benchmarks                         |
 | **grepai**               | Semantic code search by intent                                          |
 | **grill-me**             | Interview the user relentlessly to stress-test a plan or design         |
+| **grill-with-docs**      | Stress-test a plan against project domain model and update CONTEXT/ADRs |
 | **markdown-conventions** | Markdown formatting conventions (.agents/ only)                         |
 | **markdown-to-skill**    | Bulk-convert Markdown to skills (.claude/ only)                         |
 | **next-task**            | Continue working through a project plan                                 |
